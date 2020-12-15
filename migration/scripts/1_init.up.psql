@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS employees (
+  assignment_id INTEGER NOT NULL,
+  employee_id INTEGER,
+  fio varchar(256) NOT NULL DEFAULT '',
+  job_name varchar(256) NOT NULL DEFAULT '',
+  PRIMARY KEY(assignment_id)
+);
+
+CREATE TABLE IF NOT EXISTS salaries (
+  assignment_id INTEGER NOT NULL,
+  salary INTEGER,
+  date_from DATE,
+  PRIMARY KEY(assignment_id)
+);

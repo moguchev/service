@@ -1,0 +1,14 @@
+server:
+  address: ":7000"
+  basepath: "/api/service/v1"
+
+db:
+  postgresql: "host=localhost port=5433 user=leo password=140699 dbname=leo sslmode=disable"
+  max_open_conn: 20
+  max_idle_conn: 10
+  max_conn_lifetime: 1h
+
+log:
+  output: stdout
+  level: debug
+  formatter: json
