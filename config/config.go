@@ -11,8 +11,8 @@ import (
 
 type (
 	ServerConfig struct {
-		Address     string
-		APIBasePath string
+		Address     string `yaml:"address"`
+		APIBasePath string `yaml:"basepath"`
 	}
 
 	Config struct {
