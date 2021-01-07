@@ -12,10 +12,16 @@ import (
 	"strings"
 	"syscall"
 
+	emp_uc "github.com/moguchev/service/internal/employees/usecase"
+
+	delivery "github.com/moguchev/service/internal/employees/delivery/http"
+
 	"github.com/golang-migrate/migrate"
+	"github.com/gorilla/mux"
 	"github.com/moguchev/service/config"
 	"github.com/moguchev/service/migration"
 	"github.com/moguchev/service/pkg/logger"
+	"github.com/moguchev/service/pkg/middleware"
 	"github.com/moguchev/service/pkg/pgsql"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
@@ -56,12 +62,27 @@ func main() {
 		log.WithError(err).Fatal("migrate db")
 	}
 
-	// Set Handlers
-	var handler http.Handler = http.NewServeMux()
+	// Create Repository level
+	// Create Usecase level
+	employeeUC := emp_uc.NewEmployeesUsecase()
 
+	// Create Router
+	router := mux.NewRouter()
+
+	// Set Middlewares
+	mw := middleware.InitMiddleware(log)
+	router.Use(mw.RecoverMiddleware)
+	router.Use(mw.CORSMiddleware)
+
+	// Set Handlers
+	base := router.PathPrefix(cfg.Server.APIBasePath).Subrouter()
+
+	delivery.SetEmployeesHandler(base, employeeUC)
+
+	// Make Server
 	bctx := logger.WithLogger(context.Background(), log)
 	srv := http.Server{
-		Handler: handler,
+		Handler: router,
 		Addr:    cfg.Server.Address,
 		BaseContext: func(net.Listener) context.Context {
 			return bctx
