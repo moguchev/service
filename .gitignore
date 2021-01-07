@@ -1,2 +1,9 @@
+# binary
 cmd/service/service
+# idea
 vscode
+# data
+migration/scripts/2_employees_20201215.down.psql
+migration/scripts/2_employees_20201215.up.psql
+migration/scripts/3_salaries_20201215.down.psql
+migration/scripts/3_salaries_20201215.up.psql
