@@ -12,9 +12,9 @@ import (
 	"strings"
 	"syscall"
 
-	emp_delivery "github.com/moguchev/service/internal/employees/delivery/http"
-	emp_repo "github.com/moguchev/service/internal/employees/repository"
-	emp_uc "github.com/moguchev/service/internal/employees/usecase"
+	delivery "github.com/moguchev/service/internal/delivery/http"
+	repo "github.com/moguchev/service/internal/repository"
+	uc "github.com/moguchev/service/internal/usecase"
 
 	"github.com/golang-migrate/migrate"
 	"github.com/gorilla/mux"
@@ -63,9 +63,9 @@ func main() {
 	}
 
 	// Create Repository level
-	empRepo := emp_repo.NewEmployeesRepository(db)
+	empRepo := repo.NewEmployeesRepository(db)
 	// Create Usecase level
-	empUC := emp_uc.NewEmployeesUsecase(empRepo)
+	empUC := uc.NewEmployeesUsecase(empRepo)
 
 	// Create Router
 	router := mux.NewRouter()
@@ -78,7 +78,7 @@ func main() {
 	// Set Handlers
 	base := router.PathPrefix(cfg.Server.APIBasePath).Subrouter()
 
-	emp_delivery.SetEmployeesHandler(base, empUC)
+	delivery.SetEmployeesHandler(base, empUC)
 
 	// Make Server
 	bctx := logger.WithLogger(context.Background(), log)
