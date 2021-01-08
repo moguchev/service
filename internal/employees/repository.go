@@ -8,6 +8,6 @@ import (
 
 // Repository - database level
 type Repository interface {
-	CountEmployees(ctx context.Context, f models.EmployeeFilter) (int, error)
+	CountEmployees(ctx context.Context, f models.EmployeeFilter) (uint, error)
 	GetEmployees(ctx context.Context, f models.EmployeeFilter) (models.Employees, error)
 }

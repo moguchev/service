@@ -8,6 +8,5 @@ import (
 
 // Usecase - business logic
 type Usecase interface {
-	CountEmployees(ctx context.Context, f models.EmployeeFilter) (int, error)
-	GetEmployees(ctx context.Context, f models.EmployeeFilter) (models.Employees, error)
+	GetEmployees(ctx context.Context, f models.EmployeeFilter) (uint, models.Employees, error)
 }

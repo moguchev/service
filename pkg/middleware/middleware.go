@@ -7,7 +7,7 @@ type Middleware struct {
 	log *logrus.Logger
 }
 
-// InitMiddleware - intialize the middleware
+// InitMiddleware - initialize the middleware
 func InitMiddleware(l *logrus.Logger) *Middleware {
 	return &Middleware{
 		log: l,

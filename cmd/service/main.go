@@ -12,9 +12,9 @@ import (
 	"strings"
 	"syscall"
 
+	emp_delivery "github.com/moguchev/service/internal/employees/delivery/http"
+	emp_repo "github.com/moguchev/service/internal/employees/repository"
 	emp_uc "github.com/moguchev/service/internal/employees/usecase"
-
-	delivery "github.com/moguchev/service/internal/employees/delivery/http"
 
 	"github.com/golang-migrate/migrate"
 	"github.com/gorilla/mux"
@@ -57,14 +57,15 @@ func main() {
 
 	// Migrate DB
 	err = pgsql.EnsureDB(db, migration.Assets)
-	// !errors.Is(err, migrate.ErrNoChange) do not work(
+	// !errors.Is(err, migrate.ErrNoChange) do not work
 	if err != nil && strings.Compare(err.Error(), migrate.ErrNoChange.Error()) != 0 {
 		log.WithError(err).Fatal("migrate db")
 	}
 
 	// Create Repository level
+	empRepo := emp_repo.NewEmployeesRepository(db)
 	// Create Usecase level
-	employeeUC := emp_uc.NewEmployeesUsecase()
+	empUC := emp_uc.NewEmployeesUsecase(empRepo)
 
 	// Create Router
 	router := mux.NewRouter()
@@ -77,7 +78,7 @@ func main() {
 	// Set Handlers
 	base := router.PathPrefix(cfg.Server.APIBasePath).Subrouter()
 
-	delivery.SetEmployeesHandler(base, employeeUC)
+	emp_delivery.SetEmployeesHandler(base, empUC)
 
 	// Make Server
 	bctx := logger.WithLogger(context.Background(), log)
@@ -89,7 +90,7 @@ func main() {
 		},
 	}
 
-	group, ctx := errgroup.WithContext(ctx)
+	group, gctx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		err = srv.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -99,15 +100,18 @@ func main() {
 	})
 
 	group.Go(func() error {
-		stop := make(chan os.Signal, 1)
-		signal.Notify(stop,
+		sgnl := make(chan os.Signal, 1)
+		signal.Notify(sgnl,
+			syscall.SIGHUP,
 			syscall.SIGINT,
 			syscall.SIGTERM,
+			syscall.SIGQUIT,
 		)
-		<-stop
-		log.Info("stop service")
+		stop := <-sgnl
+		log.WithField("signal", stop).Info("waiting for all processes to stop")
+
 		cancel()
-		err = srv.Shutdown(context.Background())
+		err = srv.Shutdown(gctx)
 		if err != nil {
 			return err
 		}

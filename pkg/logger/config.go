@@ -44,7 +44,7 @@ type Config struct {
 	Level     string `yaml:"level" json:"level" toml:"level"`             // enum (panic|fatal|error|warning|info|debug|trace)
 }
 
-// CreateLogger returns logger acording config
+// CreateLogger returns logger according config
 func (config Config) CreateLogger() *logrus.Logger {
 	logger := logrus.New()
 
