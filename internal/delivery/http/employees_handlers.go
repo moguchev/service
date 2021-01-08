@@ -26,18 +26,15 @@ func SetEmployeesHandler(router *mux.Router, us employees.Usecase) {
 		Usecase: us,
 	}
 
-	router.HandleFunc("/employees", handler.GetEmployees).Methods(http.MethodGet)
-	router.HandleFunc("/employees/{employee_id}", handler.GetEmployeeByID).Methods(http.MethodGet)
+	router.HandleFunc("/employees", handler.GetEmployeesHandler).Methods(http.MethodGet)
+	router.HandleFunc("/employees/{employee_id}", handler.GetEmployeeByIDHandler).Methods(http.MethodGet)
 }
 
-// GetEmployees -
-func (h *EmployeesHandler) GetEmployees(w http.ResponseWriter, r *http.Request) {
+// GetEmployeesHandler -
+func (h *EmployeesHandler) GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
 
-	log := logger.GetLogger(ctx).WithField("handler", "GetEmployees")
+	log := logger.GetLogger(ctx).WithField("handler", "GetEmployeesHandler")
 
 	filter, err := getEmployeeFilter(r.URL.Query())
 	if err != nil {
@@ -128,8 +125,8 @@ func getEmployeeFilter(values url.Values) (models.EmployeeFilter, error) {
 	return f, nil
 }
 
-// GetEmployeeByID -
-func (h *EmployeesHandler) GetEmployeeByID(w http.ResponseWriter, r *http.Request) {
+// GetEmployeeByIDHandler -
+func (h *EmployeesHandler) GetEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if ctx == nil {
 		ctx = context.Background()
