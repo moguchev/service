@@ -106,13 +106,13 @@ func (mock *employeesUsecaseSuccessMock) GetEmployees(ctx context.Context, f mod
 	}}, nil
 }
 
-func NewEmployeesUsecaseSuccessMock() employees.Usecase {
+func newEmployeesUsecaseSuccessMock() employees.Usecase {
 	return &employeesUsecaseSuccessMock{}
 }
 
 func TestSetEmployeesHandler(t *testing.T) {
 	router := mux.NewRouter()
-	uc := NewEmployeesUsecaseSuccessMock()
+	uc := newEmployeesUsecaseSuccessMock()
 
 	SetEmployeesHandler(router, uc)
 
@@ -147,7 +147,7 @@ func TestGetEmployeesHandler_Success(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	uc := NewEmployeesUsecaseSuccessMock()
+	uc := newEmployeesUsecaseSuccessMock()
 	h := EmployeesHandler{uc}
 	handler := http.HandlerFunc(h.GetEmployeesHandler)
 
@@ -172,7 +172,7 @@ func TestGetEmployeesHandler_BadRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	uc := NewEmployeesUsecaseSuccessMock()
+	uc := newEmployeesUsecaseSuccessMock()
 	h := EmployeesHandler{uc}
 	handler := http.HandlerFunc(h.GetEmployeesHandler)
 
@@ -242,7 +242,7 @@ func TestGetEmployeeByIDHandler_BadRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	uc := NewEmployeesUsecaseSuccessMock()
+	uc := newEmployeesUsecaseSuccessMock()
 	h := EmployeesHandler{uc}
 	handler := http.HandlerFunc(h.GetEmployeeByIDHandler)
 
@@ -303,7 +303,7 @@ func (mock *employeesUsecaseEmptyMock) GetEmployees(ctx context.Context, f model
 	return 0, models.Employees{}, nil
 }
 
-func NewEmployeesUsecaseEmptyMock() employees.Usecase {
+func newEmployeesUsecaseEmptyMock() employees.Usecase {
 	return &employeesUsecaseEmptyMock{}
 }
 
@@ -313,7 +313,7 @@ func TestGetEmployeeByIDHandler_NotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	uc := NewEmployeesUsecaseEmptyMock()
+	uc := newEmployeesUsecaseEmptyMock()
 	h := EmployeesHandler{uc}
 	router := mux.NewRouter()
 	router.HandleFunc(fmt.Sprintf("/employees/{%s}", employeeIDParam), h.GetEmployeeByIDHandler)
@@ -340,7 +340,7 @@ func TestGetEmployeeByIDHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	uc := NewEmployeesUsecaseSuccessMock()
+	uc := newEmployeesUsecaseSuccessMock()
 	h := EmployeesHandler{uc}
 	router := mux.NewRouter()
 	router.HandleFunc(fmt.Sprintf("/employees/{%s}", employeeIDParam), h.GetEmployeeByIDHandler)
