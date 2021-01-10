@@ -5,13 +5,16 @@ import (
 	"net/http"
 
 	"github.com/moguchev/service/pkg/logger"
-
-	"github.com/moguchev/service/internal/models"
 )
+
+// ErrorMessage - answer with error
+type ErrorMessage struct {
+	Message string `json:"error"`
+}
 
 // RespondWithError - answer with error log
 func RespondWithError(w http.ResponseWriter, r *http.Request, code int, err error) {
-	RespondWithJSON(w, r, code, models.ErrorMessage{Message: err.Error()})
+	RespondWithJSON(w, r, code, ErrorMessage{Message: err.Error()})
 }
 
 // RespondWithJSON - http json respond

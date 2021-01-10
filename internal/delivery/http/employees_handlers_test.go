@@ -17,6 +17,7 @@ import (
 
 	"github.com/moguchev/service/internal/employees"
 	"github.com/moguchev/service/internal/models"
+	"github.com/moguchev/service/pkg/utils"
 )
 
 func TestGetEmployeeFilter(t *testing.T) {
@@ -183,7 +184,7 @@ func TestGetEmployeesHandler_BadRequest(t *testing.T) {
 			status, http.StatusBadRequest)
 	}
 
-	msg := models.ErrorMessage{}
+	msg := utils.ErrorMessage{}
 
 	if err := json.Unmarshal(rr.Body.Bytes(), &msg); err != nil {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -223,7 +224,7 @@ func TestGetEmployeesHandler_InternalError(t *testing.T) {
 			status, http.StatusInternalServerError)
 	}
 
-	msg := models.ErrorMessage{}
+	msg := utils.ErrorMessage{}
 
 	if err := json.Unmarshal(rr.Body.Bytes(), &msg); err != nil {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -253,7 +254,7 @@ func TestGetEmployeeByIDHandler_BadRequest(t *testing.T) {
 			status, http.StatusBadRequest)
 	}
 
-	msg := models.ErrorMessage{}
+	msg := utils.ErrorMessage{}
 
 	if err := json.Unmarshal(rr.Body.Bytes(), &msg); err != nil {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -284,7 +285,7 @@ func TestGetEmployeeByIDHandler_InternalError(t *testing.T) {
 			status, http.StatusInternalServerError)
 	}
 
-	msg := models.ErrorMessage{}
+	msg := utils.ErrorMessage{}
 
 	if err := json.Unmarshal(rr.Body.Bytes(), &msg); err != nil {
 		t.Errorf("handler returned unexpected body: got %v want %v",
