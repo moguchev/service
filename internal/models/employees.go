@@ -31,7 +31,7 @@ type (
 		AssignmentID int64      `json:"assignment_id" db:"assignment_id"`
 		FIO          string     `json:"fio" db:"fio"`
 		JobName      string     `json:"job_name" db:"job_name"`
-		Salary       float64    `json:"salary" db:"salary"`
+		Salary       *float64   `json:"salary" db:"salary"`
 		DateFrom     *time.Time `json:"date_from,omitempty" db:"date_from"`
 	}
 

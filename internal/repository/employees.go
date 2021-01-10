@@ -21,42 +21,6 @@ func NewEmployeesRepository(db *sqlx.DB) employees.Repository {
 	return &employeesRepository{db: db}
 }
 
-func (r *employeesRepository) CountEmployees(ctx context.Context, f models.EmployeeFilter) (uint, error) {
-	log := logger.GetLogger(ctx).WithFields(logrus.Fields{
-		"actor":  "repository",
-		"func":   "CountEmployees",
-		"filter": f,
-	})
-
-	query := sq.Select("COUNT(employee_id)").From("employees").
-		Join("salaries ON employees.assignment_id = salaries.assignment_id").
-		PlaceholderFormat(sq.Dollar)
-
-	f.Limit = nil
-	f.Offset = nil
-	f.SalarySort = nil
-	f.DateFromSort = nil
-
-	query = applyEmployeeFilter(query, f)
-
-	sql, args, err := query.ToSql()
-	if err != nil {
-		return 0, fmt.Errorf("to sql: %w", err)
-	}
-
-	log = log.WithFields(logrus.Fields{"query": sql, "args": args})
-
-	log.Debug("count employees")
-
-	var count uint
-	if err = r.db.QueryRowxContext(ctx, sql, args...).Scan(&count); err != nil {
-		log.WithError(err).Error("count employees")
-		return 0, fmt.Errorf("count employees: %w", err)
-	}
-
-	return count, nil
-}
-
 func applyEmployeeFilter(sb sq.SelectBuilder, f models.EmployeeFilter) sq.SelectBuilder {
 	expr := sq.And{}
 
@@ -103,6 +67,42 @@ func applyEmployeeFilter(sb sq.SelectBuilder, f models.EmployeeFilter) sq.Select
 	}
 
 	return sb
+}
+
+func (r *employeesRepository) CountEmployees(ctx context.Context, f models.EmployeeFilter) (uint, error) {
+	log := logger.GetLogger(ctx).WithFields(logrus.Fields{
+		"actor":  "repository",
+		"func":   "CountEmployees",
+		"filter": f,
+	})
+
+	query := sq.Select("COUNT(employee_id)").From("employees").
+		Join("salaries ON employees.assignment_id = salaries.assignment_id").
+		PlaceholderFormat(sq.Dollar)
+
+	f.Limit = nil
+	f.Offset = nil
+	f.SalarySort = nil
+	f.DateFromSort = nil
+
+	query = applyEmployeeFilter(query, f)
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("to sql: %w", err)
+	}
+
+	log = log.WithFields(logrus.Fields{"query": sql, "args": args})
+
+	log.Debug("count employees")
+
+	var count uint
+	if err = r.db.QueryRowxContext(ctx, sql, args...).Scan(&count); err != nil {
+		log.WithError(err).Error("count employees")
+		return 0, fmt.Errorf("count employees: %w", err)
+	}
+
+	return count, nil
 }
 
 func (r *employeesRepository) GetEmployees(ctx context.Context, f models.EmployeeFilter) (models.Employees, error) {

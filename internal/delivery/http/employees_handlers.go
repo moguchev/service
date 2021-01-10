@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,25 +14,29 @@ import (
 	"github.com/moguchev/service/pkg/utils"
 )
 
+const (
+	employeeIDParam = "employee_id"
+)
+
 // EmployeesHandler represent the http handler for employees
 type EmployeesHandler struct {
 	Usecase employees.Usecase
 }
 
 // SetEmployeesHandler will initialize the employee(s)/ resources endpoint
-func SetEmployeesHandler(router *mux.Router, us employees.Usecase) {
+func SetEmployeesHandler(router *mux.Router, uc employees.Usecase) {
 	handler := &EmployeesHandler{
-		Usecase: us,
+		Usecase: uc,
 	}
 
 	router.HandleFunc("/employees", handler.GetEmployeesHandler).Methods(http.MethodGet)
-	router.HandleFunc("/employees/{employee_id}", handler.GetEmployeeByIDHandler).Methods(http.MethodGet)
+	router.HandleFunc(fmt.Sprintf("/employees/{%s}", employeeIDParam),
+		handler.GetEmployeeByIDHandler).Methods(http.MethodGet)
 }
 
 // GetEmployeesHandler -
 func (h *EmployeesHandler) GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	log := logger.GetLogger(ctx).WithField("handler", "GetEmployeesHandler")
 
 	filter, err := getEmployeeFilter(r.URL.Query())
@@ -84,13 +87,6 @@ func getEmployeeFilter(values url.Values) (models.EmployeeFilter, error) {
 		case "fio":
 			fio := v
 			f.FIO = &fio
-		case "employee_id":
-			employeeID, e := strconv.ParseInt(v, 10, 64)
-			if e != nil {
-				err = fmt.Errorf("employee_id: %w", e)
-				break
-			}
-			f.EmployeeID = &employeeID
 		case "assignment_id":
 			assignment, e := strconv.ParseInt(v, 10, 64)
 			if e != nil {
@@ -128,13 +124,31 @@ func getEmployeeFilter(values url.Values) (models.EmployeeFilter, error) {
 // GetEmployeeByIDHandler -
 func (h *EmployeesHandler) GetEmployeeByIDHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	if ctx == nil {
-		ctx = context.Background()
+	log := logger.GetLogger(ctx).WithField("handler", "GetEmployeeByIDHandler")
+
+	id := mux.Vars(r)[employeeIDParam]
+
+	log.WithField("url", r.URL).Info("url")
+	log.WithField(employeeIDParam, id).Info("id")
+
+	empID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		log.WithError(err).WithField(employeeIDParam, id).Error("parse")
+		utils.RespondWithError(w, r, http.StatusBadRequest, err)
+		return
 	}
 
-	log := logger.GetLogger(ctx).WithField("handler", "GetEmployees")
+	_, emps, err := h.Usecase.GetEmployees(ctx, models.EmployeeFilter{EmployeeID: &empID})
+	if err != nil {
+		log.WithError(err).Error("get employee by id")
+		utils.RespondWithError(w, r, http.StatusInternalServerError, models.ErrInternal)
+		return
+	}
 
-	log.Info("OK")
+	if len(emps) == 0 {
+		utils.RespondWithJSON(w, r, http.StatusNotFound, struct{}{})
+		return
+	}
 
-	utils.RespondWithJSON(w, r, http.StatusOK, struct{}{})
+	utils.RespondWithJSON(w, r, http.StatusOK, emps[0])
 }
